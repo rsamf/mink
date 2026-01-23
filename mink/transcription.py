@@ -2,7 +2,7 @@ import logging
 from typing import List
 from faster_whisper import WhisperModel, BatchedInferencePipeline
 from omegaconf import DictConfig
-from models import TranscriptEvent
+from .models import TranscriptEvent
 
 logger = logging.getLogger(__name__)
 

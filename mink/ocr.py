@@ -5,7 +5,7 @@ from typing import List
 from scenedetect import VideoManager, SceneManager
 from scenedetect.detectors import ContentDetector
 from omegaconf import DictConfig
-from models import OnScreenEvent
+from .models import OnScreenEvent
 
 logger = logging.getLogger(__name__)
 

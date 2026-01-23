@@ -9,9 +9,9 @@ import hydra
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, status
 from fastapi.responses import JSONResponse
 from omegaconf import DictConfig
-from models import Job
-from transcription import process_transcription
-from ocr import process_ocr
+from .models import Job
+from .transcription import process_transcription
+from .ocr import process_ocr
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -143,7 +143,7 @@ async def take_notes(background_tasks: BackgroundTasks, file: UploadFile = File(
     return job
 
 
-@hydra.main(version_base=None, config_path="config", config_name="config")
+@hydra.main(version_base=None, config_path="../config", config_name="config")
 def main(cfg: DictConfig):
     config_store["config"] = cfg
     uvicorn.run(app, host="0.0.0.0", port=8000)
