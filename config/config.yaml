@@ -1,0 +1,10 @@
+ocr:
+  model: easyocr
+  lang: [en]
+
+transcript:
+  model: faster-whisper
+  lang: [en]
+
+hydra.runtime:
+  output_dir: .outputs
