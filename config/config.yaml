@@ -8,7 +8,5 @@ transcript:
   batch_size: 8
   bin_size: 10
 
-auth:
-  type: static
-  keys:
-    - dev-key-123
+api: dev
+db: cloudsql

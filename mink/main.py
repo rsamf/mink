@@ -9,9 +9,12 @@ import hydra
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, status
 from fastapi.responses import JSONResponse
 from omegaconf import DictConfig
-from .models import Job
+from .models import Job, Meeting
 from .transcription import process_transcription
 from .ocr import process_ocr
+from .db import init_db, get_session
+import time
+from sqlmodel import select
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +22,12 @@ logger = logging.getLogger("mink")
 
 app = FastAPI(title="Mink")
 config_store = {}
+
+
+@app.on_event("startup")
+def on_startup():
+    if "config" in config_store:
+        init_db(config_store["config"])
 
 
 @app.middleware("http")
@@ -44,7 +53,7 @@ def run_transcription_worker(
 ):
     try:
         logger.info(f"Job {job_id}: Starting transcription worker")
-        events = process_transcription(video_path, config)
+        events = process_transcription(video_path, job_id, config)
         logger.info(
             f"Job {job_id}: Transcription finished. Found {len(events)} events."
         )
@@ -57,7 +66,7 @@ def run_transcription_worker(
 def run_ocr_worker(job_id: str, video_path: str, config: DictConfig, queue: Queue):
     try:
         logger.info(f"Job {job_id}: Starting OCR worker")
-        events = process_ocr(video_path, config)
+        events = process_ocr(video_path, job_id, config)
         logger.info(f"Job {job_id}: OCR finished. Found {len(events)} events.")
         queue.put(events)
     except Exception as e:
@@ -108,6 +117,29 @@ def run_worker_task(job: Job):
         f"Job {job_id}: Retrieved {len(full_transcript)} transcript events and {len(full_ocr)} OCR events."
     )
 
+    # Save to DB
+    try:
+        # We use a new session here since this runs in a separate thread (BackgroundTasks)
+        with next(get_session()) as session:
+            # Re-fetch job to ensure attached to session? Or just update status
+            db_job = session.get(Job, job_id)
+            if db_job:
+                db_job.job_status = "completed"
+                session.add(db_job)
+
+                for event in full_transcript:
+                    session.add(event)
+                for event in full_ocr:
+                    session.add(event)
+
+                session.commit()
+                logger.info(f"Job {job_id}: Saved results to database.")
+            else:
+                logger.error(f"Job {job_id}: Job not found in DB during save.")
+
+    except Exception as e:
+        logger.error(f"Job {job_id}: Failed to save to DB: {e}")
+
     # Print results as requested
     print(f"--- Transcript ({len(full_transcript)} events) ---")
     for e in full_transcript:
@@ -138,7 +170,24 @@ async def take_notes(background_tasks: BackgroundTasks, file: UploadFile = File(
     cfg = config_store["config"]
 
     # Start job
-    job = Job(job_id=job_id, job_status="queued")
+    # Create Meeting and Job
+    try:
+        with next(get_session()) as session:
+            meeting = Meeting(
+                name=f"Meeting {job_id}", time_started=time.time()  # Placeholder name
+            )
+            session.add(meeting)
+            session.commit()
+            session.refresh(meeting)
+
+            job = Job(job_id=job_id, job_status="queued", meeting_id=meeting.id)
+            session.add(job)
+            session.commit()
+            session.refresh(job)
+    except Exception as e:
+        logger.error(f"Failed to create DB records: {e}")
+        return Job(job_id=job_id, job_status="failed_db_error")
+
     background_tasks.add_task(run_worker_task, job)
     return job
 

@@ -11,3 +11,8 @@ wheels/
 
 # Hydra
 outputs
+
+# Terraform
+.terraform*
+terraform.tfstate*
+*.tfvars

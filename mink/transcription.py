@@ -7,7 +7,9 @@ from .models import TranscriptEvent
 logger = logging.getLogger(__name__)
 
 
-def process_transcription(video_path: str, config: DictConfig) -> List[TranscriptEvent]:
+def process_transcription(
+    video_path: str, job_id: str, config: DictConfig
+) -> List[TranscriptEvent]:
     """
     Transcribes a video file using faster-whisper with batched inference.
     """
@@ -26,7 +28,11 @@ def process_transcription(video_path: str, config: DictConfig) -> List[Transcrip
         batch_size = config.transcript.batch_size
         logger.info(f"Transcribing with batch_size={batch_size}")
 
-        segments, info = batched_model.transcribe(video_path, batch_size=batch_size)
+        segments, info = batched_model.transcribe(
+            video_path,
+            vad_filter=True,
+            batch_size=batch_size,
+        )
 
         events = []
         for segment in segments:
@@ -36,6 +42,7 @@ def process_transcription(video_path: str, config: DictConfig) -> List[Transcrip
                     content=segment.text,
                     start=segment.start,
                     end=segment.end,
+                    job_id=job_id,
                 )
             )
 

@@ -10,7 +10,9 @@ from .models import OnScreenEvent
 logger = logging.getLogger(__name__)
 
 
-def process_ocr(video_path: str, config: DictConfig) -> List[OnScreenEvent]:
+def process_ocr(
+    video_path: str, job_id: str, config: DictConfig
+) -> List[OnScreenEvent]:
     """
     Detects scenes in a video and performs OCR on the middle frame of each scene.
     """
@@ -82,6 +84,7 @@ def process_ocr(video_path: str, config: DictConfig) -> List[OnScreenEvent]:
                         end=end_time,
                         bbox=bbox,
                         confidence=res[2],
+                        job_id=job_id,
                     )
                 )
 
