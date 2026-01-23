@@ -3,8 +3,7 @@ ocr:
   lang: [en]
 
 transcript:
-  model: faster-whisper
-  lang: [en]
-
-hydra.runtime:
-  output_dir: .outputs
+  model_size: turbo
+  precision: int8
+  batch_size: 8
+  bin_size: 10
