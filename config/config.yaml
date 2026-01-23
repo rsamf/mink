@@ -7,3 +7,8 @@ transcript:
   precision: int8
   batch_size: 8
   bin_size: 10
+
+auth:
+  type: static
+  keys:
+    - dev-key-123

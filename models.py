@@ -14,7 +14,7 @@ class OnScreenEvent(BaseModel):
     content: str
     start: float
     end: float
-    bbox: List[float]
+    bbox: List[int]
     confidence: float
 
 

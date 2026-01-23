@@ -66,13 +66,21 @@ def process_ocr(video_path: str, config: DictConfig) -> List[OnScreenEvent]:
         # results format: [[bbox, text, conf], ...]
         if results:
             for res in results:
+                # For some reason EasyOCR returns XY,XY,XY,XY
+                raw_bbox = res[0]
+                bbox = [
+                    int(raw_bbox[0][0]),
+                    int(raw_bbox[0][1]),
+                    int(raw_bbox[2][0]),
+                    int(raw_bbox[2][1]),
+                ]
                 events.append(
                     OnScreenEvent(
                         speaker_name=None,
                         content=res[1],
                         start=start_time,
                         end=end_time,
-                        bbox=res[0],
+                        bbox=bbox,
                         confidence=res[2],
                     )
                 )
