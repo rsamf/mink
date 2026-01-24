@@ -22,7 +22,17 @@ dependencies = [
     "rich>=14.2.0",
 ]
 
+[project.optional-dependencies]
+lightonocr = [
+    "pillow>=12.1.0",
+    "pypdfium2>=5.3.0",
+    "transformers",
+]
+
 [tool.uv]
 required-environments = [
     "sys_platform == 'linux' and platform_machine == 'x86_64'"
 ]
+
+[tool.uv.sources]
+transformers = { git = "https://github.com/huggingface/transformers" }
