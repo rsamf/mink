@@ -3,9 +3,12 @@ import uuid
 import os
 import shutil
 import multiprocessing as mp
-from multiprocessing import Queue
 import uvicorn
 import hydra
+import time
+from multiprocessing import Queue
+from contextlib import asynccontextmanager
+from sqlmodel import select
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, status
 from fastapi.responses import JSONResponse
 from omegaconf import DictConfig
@@ -13,21 +16,22 @@ from .models import Job, Meeting
 from .transcription import process_transcription
 from .ocr import process_ocr
 from .db import init_db, get_session
-import time
-from sqlmodel import select
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mink")
 
-app = FastAPI(title="Mink")
 config_store = {}
 
 
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     if "config" in config_store:
         init_db(config_store["config"])
+    yield
+
+
+app = FastAPI(title="Mink", lifespan=lifespan)
 
 
 @app.middleware("http")
@@ -121,16 +125,25 @@ def run_worker_task(job: Job):
     try:
         # We use a new session here since this runs in a separate thread (BackgroundTasks)
         with next(get_session()) as session:
-            # Re-fetch job to ensure attached to session? Or just update status
+            # Update job with
             db_job = session.get(Job, job_id)
             if db_job:
                 db_job.job_status = "completed"
-                session.add(db_job)
 
+                transcript_duration = full_transcript[-1].end
                 for event in full_transcript:
                     session.add(event)
+                    db_job.transcript_events.append(event)
                 for event in full_ocr:
                     session.add(event)
+                    db_job.ocr_events.append(event)
+
+                session.add(db_job)
+
+                meeting = session.get(Meeting, db_job.meeting_id)
+                if meeting:
+                    meeting.duration = transcript_duration
+                    session.add(meeting)
 
                 session.commit()
                 logger.info(f"Job {job_id}: Saved results to database.")
@@ -139,15 +152,6 @@ def run_worker_task(job: Job):
 
     except Exception as e:
         logger.error(f"Job {job_id}: Failed to save to DB: {e}")
-
-    # Print results as requested
-    print(f"--- Transcript ({len(full_transcript)} events) ---")
-    for e in full_transcript:
-        print(f"{e.start:.2f}-{e.end:.2f}: {e.content}")
-
-    print(f"--- OCR ({len(full_ocr)} events) ---")
-    for e in full_ocr:
-        print(f"{e.start:.2f}-{e.end:.2f}: {e.content}")
 
 
 @app.post("/take-notes", response_model=Job)
@@ -173,9 +177,7 @@ async def take_notes(background_tasks: BackgroundTasks, file: UploadFile = File(
     # Create Meeting and Job
     try:
         with next(get_session()) as session:
-            meeting = Meeting(
-                name=f"Meeting {job_id}", time_started=time.time()  # Placeholder name
-            )
+            meeting = Meeting(name=f"Meeting {job_id}", time_started=time.time())
             session.add(meeting)
             session.commit()
             session.refresh(meeting)

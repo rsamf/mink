@@ -1,3 +1,8 @@
+defaults:
+  - api: dev
+  - db: local
+  - _self_
+
 ocr:
   model: easyocr
   lang: [en]
@@ -8,5 +13,3 @@ transcript:
   batch_size: 8
   bin_size: 10
 
-api: dev
-db: cloudsql

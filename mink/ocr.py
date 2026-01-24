@@ -80,10 +80,10 @@ def process_ocr(
                     OnScreenEvent(
                         speaker_name=None,
                         content=res[1],
-                        start=start_time,
-                        end=end_time,
+                        start=float(start_time),
+                        end=float(end_time),
                         bbox=bbox,
-                        confidence=res[2],
+                        confidence=float(res[2]),
                         job_id=job_id,
                     )
                 )

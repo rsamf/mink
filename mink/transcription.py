@@ -40,8 +40,8 @@ def process_transcription(
                 TranscriptEvent(
                     speaker_name=None,
                     content=segment.text,
-                    start=segment.start,
-                    end=segment.end,
+                    start=float(segment.start),
+                    end=float(segment.end),
                     job_id=job_id,
                 )
             )
