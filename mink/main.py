@@ -13,7 +13,7 @@ from sqlmodel import select
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, status
 from fastapi.responses import JSONResponse
 from omegaconf import DictConfig
-from .models import Job, Meeting
+from .models import Job, Meeting, JobResponse, MeetingResponse
 from .transcription import process_transcription
 from .ocr import process_ocr
 from .db import init_db, get_session
@@ -80,8 +80,25 @@ def run_ocr_worker(job_id: str, video_path: str, config: DictConfig, queue: Queu
         queue.put([])
 
 
+def set_job_status(job_id: str, status: str):
+    with next(get_session()) as session:
+        db_job = session.get(Job, job_id)
+        if db_job:
+            db_job.job_status = status
+            session.add(db_job)
+            session.commit()
+        else:
+            logger.error(f"Job {job_id}: Job not found in DB during status update.")
+
+
 def run_worker_task(job: Job):
     job_id = job.job_id
+    try:
+        set_job_status(job_id, "started")
+    except Exception as e:
+        logger.error(f"Job {job_id}: Failed to update DB status to started: {e}")
+        return
+
     upload_dir = "/tmp/mink"
 
     files = glob.glob(os.path.join(upload_dir, f"{job_id}_*"))
@@ -119,15 +136,12 @@ def run_worker_task(job: Job):
         f"Job {job_id}: Retrieved {len(full_transcript)} transcript events and {len(full_ocr)} OCR events."
     )
 
-    # Save to DB
     try:
         # We use a new session here since this runs in a separate thread (BackgroundTasks)
         with next(get_session()) as session:
             session.expire_on_commit = False
             db_job = session.get(Job, job_id)
             if db_job:
-                db_job.job_status = "completed"
-
                 transcript_duration = full_transcript[-1].end
                 for event in full_transcript:
                     session.add(event)
@@ -156,6 +170,7 @@ def run_worker_task(job: Job):
         logger.info(
             f"Job {job_id}: No LLM casting config found, skipping intelligent notes."
         )
+        set_job_status(job_id, "completed")
         return
 
     intelligent_notes = cast_to_intelligent_notes(
@@ -175,6 +190,9 @@ def run_worker_task(job: Job):
                 logger.error(f"Job {job_id}: Job not found in DB during save.")
     except Exception as e:
         logger.error(f"Job {job_id}: Failed to save to DB: {e}")
+        set_job_status(job_id, "failed")
+
+    set_job_status(job_id, "completed")
 
 
 @app.post("/take-notes", response_model=Job)
@@ -194,7 +212,6 @@ async def take_notes(background_tasks: BackgroundTasks, file: UploadFile = File(
     if "config" not in config_store:
         logger.error("Config not initialized!")
         return Job(job_id=job_id, job_status="failed")
-    cfg = config_store["config"]
 
     # Start job
     # Create Meeting and Job
@@ -205,7 +222,7 @@ async def take_notes(background_tasks: BackgroundTasks, file: UploadFile = File(
             session.commit()
             session.refresh(meeting)
 
-            job = Job(job_id=job_id, job_status="queued", meeting_id=meeting.id)
+            job = Job(job_id=job_id, job_status="queued", meeting_id=meeting.id, time_started=time.time())
             session.add(job)
             session.commit()
             session.refresh(job)
@@ -217,16 +234,34 @@ async def take_notes(background_tasks: BackgroundTasks, file: UploadFile = File(
     return job
 
 
-@app.get("/job/{job_id}", response_model=Job)
+@app.get("/job/{job_id}", response_model=JobResponse)
 async def get_job(job_id: str):
     with next(get_session()) as session:
         job = session.get(Job, job_id)
         if job:
-            return job
+            # Force load relationships before session closes
+            _ = job.transcript_events
+            _ = job.ocr_events
+            _ = job.intelligent_notes
+            return JobResponse.model_validate(job)
         else:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"detail": "Job not found"},
+            )
+
+@app.get("/meeting/{meeting_id}", response_model=MeetingResponse)
+async def get_meeting(meeting_id: int):
+    with next(get_session()) as session:
+        meeting = session.get(Meeting, meeting_id)
+        if meeting:
+            # Force load relationships before session closes
+            _ = meeting.jobs
+            return MeetingResponse.model_validate(meeting)
+        else:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "Meeting not found"},
             )
 
 

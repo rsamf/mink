@@ -19,6 +19,7 @@ dependencies = [
     "requests>=2.32.5",
     "psycopg2-binary>=2.9.11",
     "anthropic>=0.76.0",
+    "rich>=14.2.0",
 ]
 
 [tool.uv]
