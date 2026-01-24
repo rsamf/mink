@@ -1,6 +1,7 @@
 defaults:
   - api: dev
   - db: local
+  - cast: anthropic
   - _self_
 
 ocr:
@@ -11,5 +12,4 @@ transcript:
   model_size: turbo
   precision: int8
   batch_size: 8
-  bin_size: 10
 

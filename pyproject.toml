@@ -18,6 +18,7 @@ dependencies = [
     "sqlmodel>=0.0.31",
     "requests>=2.32.5",
     "psycopg2-binary>=2.9.11",
+    "anthropic>=0.76.0",
 ]
 
 [tool.uv]

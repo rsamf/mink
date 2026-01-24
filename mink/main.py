@@ -6,6 +6,7 @@ import multiprocessing as mp
 import uvicorn
 import hydra
 import time
+import glob
 from multiprocessing import Queue
 from contextlib import asynccontextmanager
 from sqlmodel import select
@@ -16,6 +17,7 @@ from .models import Job, Meeting
 from .transcription import process_transcription
 from .ocr import process_ocr
 from .db import init_db, get_session
+from .llmcast import cast_to_intelligent_notes
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -80,11 +82,7 @@ def run_ocr_worker(job_id: str, video_path: str, config: DictConfig, queue: Queu
 
 def run_worker_task(job: Job):
     job_id = job.job_id
-    # We need to reconstruct the file path. Ideally it should be passed in job or stored better.
-    # For now assuming standard path based on job_id
     upload_dir = "/tmp/mink"
-    # Find the file in upload_dir that starts with job_id
-    import glob
 
     files = glob.glob(os.path.join(upload_dir, f"{job_id}_*"))
     if not files:
@@ -125,7 +123,7 @@ def run_worker_task(job: Job):
     try:
         # We use a new session here since this runs in a separate thread (BackgroundTasks)
         with next(get_session()) as session:
-            # Update job with
+            session.expire_on_commit = False
             db_job = session.get(Job, job_id)
             if db_job:
                 db_job.job_status = "completed"
@@ -152,6 +150,31 @@ def run_worker_task(job: Job):
 
     except Exception as e:
         logger.error(f"Job {job_id}: Failed to save to DB: {e}")
+        return
+
+    if not cfg.cast:
+        logger.info(
+            f"Job {job_id}: No LLM casting config found, skipping intelligent notes."
+        )
+        return
+
+    intelligent_notes = cast_to_intelligent_notes(
+        full_transcript, full_ocr, job_id, cfg.cast
+    )
+    try:
+        with next(get_session()) as session:
+            db_job = session.get(Job, job_id)
+            if db_job:
+                for note in intelligent_notes:
+                    session.add(note)
+                    db_job.intelligent_notes.append(note)
+                session.add(db_job)
+                session.commit()
+                logger.info(f"Job {job_id}: Saved intelligent notes to database.")
+            else:
+                logger.error(f"Job {job_id}: Job not found in DB during save.")
+    except Exception as e:
+        logger.error(f"Job {job_id}: Failed to save to DB: {e}")
 
 
 @app.post("/take-notes", response_model=Job)
@@ -170,7 +193,7 @@ async def take_notes(background_tasks: BackgroundTasks, file: UploadFile = File(
 
     if "config" not in config_store:
         logger.error("Config not initialized!")
-        return Job(job_id=job_id, job_status="failed_no_config")
+        return Job(job_id=job_id, job_status="failed")
     cfg = config_store["config"]
 
     # Start job
@@ -188,10 +211,23 @@ async def take_notes(background_tasks: BackgroundTasks, file: UploadFile = File(
             session.refresh(job)
     except Exception as e:
         logger.error(f"Failed to create DB records: {e}")
-        return Job(job_id=job_id, job_status="failed_db_error")
+        return Job(job_id=job_id, job_status="failed")
 
     background_tasks.add_task(run_worker_task, job)
     return job
+
+
+@app.get("/job/{job_id}", response_model=Job)
+async def get_job(job_id: str):
+    with next(get_session()) as session:
+        job = session.get(Job, job_id)
+        if job:
+            return job
+        else:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "Job not found"},
+            )
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="config")

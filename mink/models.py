@@ -43,3 +43,13 @@ class Job(SQLModel, table=True):
     meeting: Optional[Meeting] = Relationship(back_populates="jobs")
     transcript_events: List[TranscriptEvent] = Relationship(back_populates="job")
     ocr_events: List[OnScreenEvent] = Relationship(back_populates="job")
+    intelligent_notes: List["IntelligentNote"] = Relationship(back_populates="job")
+
+
+class IntelligentNote(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    title: str
+    content: str
+    job_id: str = Field(foreign_key="job.job_id")
+
+    job: Optional["Job"] = Relationship(back_populates="intelligent_notes")

@@ -1,0 +1,19 @@
+api_key: ""
+model: claude-sonnet-4-5
+
+types:
+  - title: summary
+    prompt: |
+      The following is a transcript of a recorded 
+      meeting combined with on-screen text. Create a summary of it.
+    max_tokens: 2000
+  - title: action_items
+    prompt: |
+      The following is a transcript of a recorded 
+      meeting combined with on-screen text. Create a list of action items.
+    max_tokens: 1000
+  - title: topic
+    prompt: |
+      The following is a transcript of a recorded 
+      meeting combined with on-screen text. Describe it in one topic sentence.
+    max_tokens: 200

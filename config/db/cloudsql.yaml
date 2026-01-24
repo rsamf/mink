@@ -1,0 +1,6 @@
+provider: cloudsql
+user: ${oc.env:DB_USER,postgres}
+password: ${oc.env:DB_PASS,password}
+host: ${oc.env:DB_HOST,localhost}
+port: ${oc.env:DB_PORT,5432}
+name: ${oc.env:DB_NAME,mink}
