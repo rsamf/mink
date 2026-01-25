@@ -31,7 +31,7 @@ First, clone the repo.
 
 ### Demo
 
-The easiest way to start is to try the demo. **This requires an API key.**
+The easiest way to start is to try the demo. **This requires an API key distributed by me (@rsamf).**
 
 1. Make sure the repo is clone, and change your cwd to the repo directory.
 1. Install the CLI
@@ -71,8 +71,8 @@ The repo provides terraform to host your own Mink services in Google Cloud. The 
 1. Configure terraform/terraform.tfvars with the appropriate values. Note: `db_password` can be anything. Adding an Anthropic API key is optional, so you can leave it blank if you want.
 1. Run `terraform apply` inside of terraform.
 
-[!NOTE]
-At this point, the Cloud Run service will timeout because your container image isn't in Artifact Registry yet. This is fine.
+> [!NOTE]
+> At this point, the Cloud Run service will timeout because your container image isn't in Artifact Registry yet. This is fine.
 
 Once your container image is done building, tag and push it to your artifact registry:
 ```bash
@@ -89,8 +89,8 @@ View helpful information:
 uv run mink/cli.py -h
 ```
 
-[!TIP]
-When using the CLI on your own deployed service, you'll have to change the url and the api key. Too see these values, run `terraform output` in the terraform/ directory. Note that the terraform generated a random API key for you to use. 
+> [!TIP]
+> When using the CLI on your own deployed service, you'll have to change the url and the api key. Too see these values, run `terraform output` in the terraform/ directory. Note that the terraform generated a random API key for you to use. 
 
 To submit a video file to your own service:
 ```bash
@@ -101,8 +101,9 @@ To view past processing results, you can first look at the meeting by id:
 ```bash
 uv run python -m mink.cli --url <MINK_SERVICE_URL> <API_KEY> meeting <MEETING_ID>
 ```
+![example output of meeting command](/assets/meeting_ex.png)
 
-Then, view the associated job:
+Then, view the associated job results:
 ```bash
 uv run python -m mink.cli --url <MINK_SERVICE_URL> <API_KEY> job <JOB_ID>
 ```
