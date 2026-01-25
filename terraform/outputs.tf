@@ -2,6 +2,12 @@ output "service_url" {
   value = google_cloud_run_v2_service.default.uri
 }
 
+output "api_key" {
+  value     = random_password.api_key.result
+  sensitive = true
+  description = "Generated API key for Mink service"
+}
+
 output "artifact_registry_repo_url" {
   value = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository_id}"
 }

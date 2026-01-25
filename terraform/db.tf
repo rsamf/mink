@@ -7,11 +7,11 @@ resource "google_project_service" "sqladmin_api" {
 # CloudSQL Instance
 resource "google_sql_database_instance" "master" {
   name             = "${var.service_name}-db"
-  database_version = "POSTGRES_18"
+  database_version = "POSTGRES_17"
   region           = var.region
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-perf-optimized-N-2"
     # Open for public access. This is for MCP use and for my working demo.
     ip_configuration {
         ipv4_enabled = true

@@ -13,6 +13,11 @@ variable "db_password" {
   type        = string
 }
 
+variable "anthropic_key" {
+  description = "The API key for Anthropic"
+  type        = string
+}
+
 variable "service_name" {
   description = "The name of the Cloud Run service"
   type        = string
