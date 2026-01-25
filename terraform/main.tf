@@ -67,9 +67,6 @@ resource "google_cloud_run_v2_service" "default" {
     }
 
     containers {
-      # This image/tag is a placeholder. You will need to build and push the image 
-      # to this location before applying, or update this after the first push.
-      # Format: region-docker.pkg.dev/project_id/repository_id/image:tag
       image = local.image_name
 
       command = [
@@ -78,7 +75,8 @@ resource "google_cloud_run_v2_service" "default" {
         "mink.main",
         "db=cloudsql",
         "cast.api_key=${var.anthropic_key != null ? var.anthropic_key : ""}",
-        "server.auth.keys=extend_list(${random_password.api_key.result})"
+        # "server.auth.keys=extend_list(${random_password.api_key.result})" Note yet supported in hydra
+        "server.auth.keys=[${random_password.api_key.result}]",
       ]
 
       ports {
