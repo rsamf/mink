@@ -15,4 +15,3 @@ outputs
 # Terraform
 .terraform*
 terraform.tfstate*
-*.tfvars
