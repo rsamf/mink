@@ -18,8 +18,8 @@ provider "google" {
 
 # Generate random API key
 resource "random_password" "api_key" {
-  length  = 32
-  special = true
+  length  = 16
+  special = false
 }
 
 # Enable necessary APIs

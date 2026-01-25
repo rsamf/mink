@@ -5,6 +5,7 @@ output "service_url" {
 output "api_key" {
   value     = random_password.api_key.result
   description = "Generated API key for Mink service"
+  sensitive = true
 }
 
 output "artifact_registry_url" {

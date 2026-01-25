@@ -83,6 +83,8 @@ docker tag mink <artifact_registry_url>
 docker push <artifact_registry_url>
 ```
 
+You may need to run `terraform apply` again to have Cloud Run re-pull.
+
 ## CLI
 
 The CLI provides basic operations to submit meeting recordings and view meetings and jobs.
@@ -93,7 +95,7 @@ uv run mink/cli.py -h
 ```
 
 > [!TIP]
-> When using the CLI on your own deployed service, you'll have to change the url and the api key. Too see these values, run `terraform output` in the terraform/ directory. Note that the terraform generated a random API key for you to use. 
+> When using the CLI on your own deployed service, you'll have to change the url and the api key. Too see these values, run `terraform output` in the terraform/ directory. Note that the terraform generated a random API key for you to use. You have to see your api key explicitly with `terraform output api_key`.
 
 To submit a video file to your own service:
 ```bash
