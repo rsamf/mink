@@ -29,7 +29,7 @@ def main():
     parser = argparse.ArgumentParser(prog="mink", description=HELP)
     # Global arguments
     parser.add_argument(
-        "--url", default="https://mink-server-18088072309.us-west2.run.app", help="Service Base URL"
+        "--url", default="https://mink-server-22cst5qoca-uc.a.run.app", help="Service Base URL"
     )
     parser.add_argument("api_key", help="API Key for authentication")
     subparser = parser.add_subparsers(dest="command")
@@ -62,13 +62,13 @@ def visualize_response(response: dict):
 
     transcript_str = "\n".join(
         [
-            f"[{event['start']:.1f} - {event['end']:.1f}] {event['speaker_name']}: {event['content']}"
+            f"[{event['start']:.1f} - {event['end']:.1f}]: {event['content']}"
             for event in transcript
         ]
     )
     ocr_str = "\n".join(
         [
-            f"[{event['start']:.1f} - {event['end']:.1f}] {event['content']}"
+            f"[{event['start']:.1f} - {event['end']:.1f}]: {event['content']}"
             for event in ocr
         ]
     )
