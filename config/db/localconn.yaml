@@ -1,6 +1,9 @@
+# Once you deployed your cloud resources, to find your CloudSQL connection info, 
+# go to the terraform directory and run:
+#   terraform output
 provider: cloudsql
 user: mink-user
-password: iloveminks<3
-host: 35.235.110.243
 port: 5432
-name: mink
+name: 
+password: 
+host: 

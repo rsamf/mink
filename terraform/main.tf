@@ -67,6 +67,10 @@ resource "google_cloud_run_v2_service" "default" {
         value = google_sql_database.database.name
       }
       env {
+        name  = "DB_HOST"
+        value = google_sql_database_instance.master.public_ip_address
+      }
+      env {
         name  = "INSTANCE_CONNECTION_NAME"
         value = google_sql_database_instance.master.connection_name
       }

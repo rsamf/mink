@@ -16,5 +16,5 @@ transcript:
   precision: int8
   batch_size: 8
 
-
+# Remove this line when enabling Anthropic
 cast: null

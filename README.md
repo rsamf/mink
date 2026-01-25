@@ -45,7 +45,58 @@ The easiest way to start is to try the demo. **This requires an API key.**
 
 In a few seconds or minutes depending on how long the recording is, you will receive your results in 3 terminal pages. First, you'll receive the intelligent notes: topic, summary, and any available action items. Then, you'll see the raw transcript, and then, raw on-screen text.
 
-### Run Locally with `uv` or `docker`
+## Deploy Your Own Mink
+
+### Cloud
+The repo provides terraform to host your own Mink services in Google Cloud. The terraform defines the necessary Cloud SQL instance and supplementary resources to store the Mink container in Artifact Registry and deploy it in Cloud Run. To deploy your resources:
+
+1. Go to GCP and create a new project
+1. Configure terraform/terraform.tfvars with the appropriate values. Note: `db_password` can be anything.
+1. Run `terraform apply` inside of terraform.
+
+Note: The Cloud Run service will timeout because your container image isn't in Artifact Registry yet. This is fine.
+
+## Config
+Mink uses [hydra](https://hydra.cc/docs/intro/) for flexible configuration of the server.
+The available configuration can be used, but it needs two extra entries to get it working:
+
+1.
+    For demo purposes, the server has a simple mechanism to restrict access to people that are "invited"
+    with an API key. You can write your own api keys (e.g. "password123") into `server.auth.keys` in config/config.yaml.
+    Be creative and supply it with 1 or more API keys.
+
+1.
+    The container that is running locally will consume config/db/localconn.yaml, but the one deployed in Cloud Run will use config/db/cloudsql.yaml which will point to the correct environment variables, so don't change that file. To provide localconn.yaml the correct connection info, go to the terraform directory, and run `terraform output`.
+
+1. 
+    (Optional) You may provide an Anthropic API key to gather meeting insights (i.e. "casting" raw text data to valuable insights). Only Anthropic is supported right now.
+    Please, add one in config/cast/anthropic.yaml at `api_key`.
+    Then, enable casting by removing the line in config/config.yaml that says `cast: null`.
+
+## Build the Docker Image
+
+Once configured,
+
+1. Build the image:
+    ```bash
+    docker build -t mink .
+    ```
+    With LightOnOCR support:
+
+    ```bash
+    docker build --build-arg sync_options="--all-extras" -t mink .
+    ```
+2. Run it locally:
+    ```bash
+    docker run --rm -d -p 8000:8000 mink
+    ```
+    *Or*, tag and push it to your artifact registry:
+    ```bash
+    docker tag mink <artifact_registry_url>
+    docker push <artifact_registry_url>
+    ```
+
+## Or run without Docker
 
 Before running the server locally, make sure to configure it and deploy an instance of Cloud SQL. See sections <a href="#config">Config</a> and <a href="#cloud">Cloud</a> before coming here.
 
@@ -65,48 +116,14 @@ Before running the server locally, make sure to configure it and deploy an insta
     uv run python -m mink.main
     ```
 
-#### With `docker`
-1. Build the image:
-    ```bash
-    docker build -t mink .
-    ```
-    With LightOnOCR support:
-
-    ```bash
-    docker build --build-arg sync_options="--all-extras" -t mink .
-    ```
-2. Then execute it:
-    ```bash
-    docker run --rm -d -p 8000:8000 mink
-    ```
-
 > [!TIP]
 > You may get a connection error if you haven't deployed Cloud SQL yet since Mink depends on that to store its data.
 
-## Config
-Mink uses [hydra](https://hydra.cc/docs/intro/) for flexible configuration of the server.
-The available configuration can be used, but it needs two extra entries to get it working:
 
-1.
-    For demo purposes, the server has a simple mechanism to restrict access to people that are "invited"
-    with an API key. You can write your own api keys (e.g. "password123") into `server.auth.keys` in config/config.yaml.
-    Be creative and supply it with 1 or more API keys.
+## MCP Setup (Optional)
+For more advanced usage of Mink, you can integrate it with existing agent platforms such as Claude Desktop. This allows you to conversationally use Mink for viewing meeting information, get even more personalized insights about past meetings, and perform other actions given the meeting information.
 
-1.
-    If you are running the container locally, you'll need to provide the necessary Cloud SQL connection information in config/db/local.yaml. The deployed container in Cloud Run will use config/db/cloudsql.yaml which will point to the correct environment variables.
-
-1. 
-    (Optional) You may provide an Anthropic API key to gather meeting insights (i.e. "casting" raw text data to valuable insights). Only Anthropic is supported right now.
-    Please, add one in config/cast/anthropic.yaml at `api_key`.
-    Then, enable casting by removing the line in config/config.yaml that says `cast: null`.
-
-## Cloud
-The repo provides terraform to host your own Mink services in Google Cloud. The terraform defines the necessary Cloud SQL instance and supplementary resources to store the Mink container in Artifact Registry and deploy it in Cloud Run. To deploy your resources:
-
-1. Go to GCP and create a new project
-1. Configure terraform/terraform.tfvars with the appropriate values. Note: `db_password` can be anything.
-1. `terraform apply`
-
-
-## MCP Setup
-https://docs.cloud.google.com/sql/docs/mysql/pre-built-tools-with-mcp-toolbox
+1. First, install Google's MCP Toolbox:
+https://docs.cloud.google.com/sql/docs/mysql/pre-built-tools-with-mcp-toolbox#install-the-mcp-toolbox
+1. Then, configure your choice of LLM system:
+https://docs.cloud.google.com/sql/docs/mysql/pre-built-tools-with-mcp-toolbox#configure-the-mcp-client
