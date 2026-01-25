@@ -85,6 +85,11 @@ docker push <artifact_registry_url>
 
 You may need to run `terraform apply` again to have Cloud Run re-pull.
 
+> [!WARNING]
+> You may have trouble downloading HF models such as FasterWhisper with Hugging Face's restrictive rate-limiting. You could see something like this:
+"HTTP Request: GET https://huggingface.co/api/models/mobiuslabsgmbh/faster-whisper-large-v3-turbo/revision/main "HTTP/1.1 429 Too Many Requests".
+If you see that, just try submitting again.
+
 ## CLI
 
 The CLI provides basic operations to submit meeting recordings and view meetings and jobs.
