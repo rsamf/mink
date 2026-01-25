@@ -69,7 +69,8 @@ The repo provides terraform to host your own Mink services in Google Cloud. The 
 
 1. Go to GCP and create a new project
 1. Configure terraform/terraform.tfvars with the appropriate values. Note: `db_password` can be anything. Adding an Anthropic API key is optional, so you can leave it blank if you want.
-1. Run `terraform apply` inside of terraform.
+1. Run `terraform init` inside of terraform.
+1. Run `terraform apply`.
 
 > [!NOTE]
 > At this point, the Cloud Run service will timeout because your container image isn't in Artifact Registry yet. This is fine.
