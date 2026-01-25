@@ -1,0 +1,6 @@
+provider: cloudsql
+user: mink-user
+password: iloveminks<3
+host: 35.235.110.243
+port: 5432
+name: mink

@@ -47,6 +47,9 @@ resource "google_cloud_run_v2_service" "default" {
       # Format: region-docker.pkg.dev/project_id/repository_id/image:tag
       image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository_id}/mink:latest"
 
+      command = ["python", "-m", "mink.main", "db=cloudsql"]
+
+
       ports {
         container_port = 8000
       }
@@ -93,12 +96,4 @@ resource "google_cloud_run_service_iam_member" "public_access" {
   service  = google_cloud_run_v2_service.default.name
   role     = "roles/run.invoker"
   member   = "allUsers"
-}
-
-output "service_url" {
-  value = google_cloud_run_v2_service.default.uri
-}
-
-output "artifact_registry_repo_url" {
-  value = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository_id}"
 }

@@ -39,7 +39,3 @@ resource "google_sql_user" "users" {
   instance = google_sql_database_instance.master.name
   password = var.db_password
 }
-
-output "db_connection_name" {
-  value = google_sql_database_instance.master.connection_name
-}

@@ -1,10 +1,16 @@
 [project]
 name = "mink"
 version = "0.1.0"
-description = "Add your description here"
+description = "Otter AI Alternative for AI note-taking for meetings"
 readme = "README.md"
 requires-python = ">=3.10.15"
 dependencies = [
+    "requests>=2.32.5",
+    "rich>=14.2.0",
+]
+
+[project.optional-dependencies]
+server = [
     "easyocr>=1.7.2",
     "fastapi[standard]>=0.128.0",
     "faster-whisper>=1.2.1",
@@ -22,7 +28,6 @@ dependencies = [
     "rich>=14.2.0",
 ]
 
-[project.optional-dependencies]
 lightonocr = [
     "pillow>=12.1.0",
     "pypdfium2>=5.3.0",

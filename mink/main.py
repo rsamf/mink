@@ -43,7 +43,7 @@ async def verify_api_key(request: Request, call_next):
 
     cfg = config_store.get("config")
 
-    if cfg and "auth" in cfg and cfg.auth.get("type") == "static":
+    if cfg and "auth" in cfg:
         api_key = request.headers.get("X-API-Key")
         if not api_key or api_key not in cfg.auth.get("keys", []):
             return JSONResponse(

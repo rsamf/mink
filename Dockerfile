@@ -1,9 +1,10 @@
+ARG sync_options="--extra server"
 FROM ghcr.io/astral-sh/uv:python3.10-trixie-slim AS builder
 
 WORKDIR /build
 
-COPY pyproject.toml uv.lock .
-RUN uv sync --python-platform x86_64-manylinux_2_38 --no-dev --frozen
+COPY pyproject.toml uv.lock ./
+RUN uv sync --python-platform x86_64-manylinux_2_38 --frozen ${sync_options}
 
 # Runtime
 FROM python:3.10-slim

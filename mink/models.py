@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict
+from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship, JSON
 from pydantic import BaseModel
 
