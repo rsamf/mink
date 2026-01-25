@@ -5,7 +5,7 @@ defaults:
 
 server:
   auth:
-    keys: []
+    keys: [] # If running locally, add a creative API key here
 
 ocr:
   model: easyocr # options: easyocr, lightonocr
@@ -15,6 +15,3 @@ transcript:
   model_size: turbo
   precision: int8
   batch_size: 8
-
-# Remove this line when enabling Anthropic
-cast: null

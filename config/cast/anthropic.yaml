@@ -1,4 +1,6 @@
-# Supply your Anthropic API key here
+# If running locally, your Anthropic API key will be needed here.
+# The Cloud Run deployed version will not look at this one. It will look at the one in terraform.tfvars.
+# Or just leave blank to disable.
 api_key: ""
 model: claude-sonnet-4-5
 
