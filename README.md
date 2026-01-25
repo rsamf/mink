@@ -121,8 +121,6 @@ Mink uses [hydra](https://hydra.cc/docs/intro/) for flexible configuration of th
 * 
     (Optional) You may provide an Anthropic API key to gather meeting insights (i.e. "casting" raw text data to valuable insights). Only Anthropic is supported right now.
     Please, add one in config/cast/anthropic.yaml at `api_key`.
-    Then, enable casting by removing the line in config/config.yaml that says `cast: null`.
-
 
 
 ## Run Locally without Docker
