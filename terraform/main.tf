@@ -73,7 +73,7 @@ resource "google_cloud_run_v2_service" "default" {
         "-m",
         "mink.main",
         "db=cloudsql",
-        "cast.api_key=${var.anthropic_key}",
+        "cast.api_key=${var.anthropic_key != null ? var.anthropic_key : ""}",
         "server.auth.keys=extend_list(${random_password.api_key.result})"
       ]
 
