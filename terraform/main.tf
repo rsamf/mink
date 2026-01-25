@@ -43,6 +43,10 @@ resource "google_artifact_registry_repository" "repo" {
   depends_on = [google_project_service.artifact_registry_api]
 }
 
+locals {
+    image_name = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository_id}/mink:latest"
+}
+
 # Cloud Run Service
 resource "google_cloud_run_v2_service" "default" {
   name                = var.service_name
@@ -66,7 +70,7 @@ resource "google_cloud_run_v2_service" "default" {
       # This image/tag is a placeholder. You will need to build and push the image 
       # to this location before applying, or update this after the first push.
       # Format: region-docker.pkg.dev/project_id/repository_id/image:tag
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository_id}/mink:latest"
+      image = local.image_name
 
       command = [
         "python",

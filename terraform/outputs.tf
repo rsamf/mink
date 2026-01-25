@@ -4,12 +4,11 @@ output "service_url" {
 
 output "api_key" {
   value     = random_password.api_key.result
-  sensitive = true
   description = "Generated API key for Mink service"
 }
 
-output "artifact_registry_repo_url" {
-  value = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository_id}"
+output "artifact_registry_url" {
+  value = local.image_name
 }
 
 output "db_name" {

@@ -22,6 +22,8 @@ Mink does not have any UI or frontend, only offering CLI tool to submit videos a
 However, all meeting data is stored in GCP Cloud SQL which offers an MCP server. That means you can easily
 talk to your meeting data with supporting tools such as Claude Desktop.
 
+![architecture diagram of mink](/assets/diag.png)
+
 #### Why I Built This?
 This was a 3-day take-home assignment for a job at Roboflow. Therefore, expect a lot of missing features.
 
@@ -75,7 +77,7 @@ The repo provides terraform to host your own Mink services in Google Cloud. The 
 > [!NOTE]
 > At this point, the Cloud Run service will timeout because your container image isn't in Artifact Registry yet. This is fine.
 
-Once your container image is done building, tag and push it to your artifact registry:
+Run `terraform output` to get your artifact registry url, and once your container image is done building, tag and push it to your artifact registry:
 ```bash
 docker tag mink <artifact_registry_url>
 docker push <artifact_registry_url>
@@ -154,3 +156,13 @@ For more advanced usage of Mink, you can integrate it with existing agent platfo
 https://docs.cloud.google.com/sql/docs/mysql/pre-built-tools-with-mcp-toolbox#install-the-mcp-toolbox
 1. Then, configure your choice of LLM system:
 https://docs.cloud.google.com/sql/docs/mysql/pre-built-tools-with-mcp-toolbox#configure-the-mcp-client
+
+## Limitations
+* No UI or web app
+* No integration with Zoom or other meeting platforms
+
+## Acknowledgments
+Thank you to:
+* [EasyOCR](https://github.com/JaidedAI/EasyOCR)
+* [LightOnOCR](https://huggingface.co/lightonai/LightOnOCR-2-1B)
+* [FasterWhisper](https://github.com/SYSTRAN/faster-whisper)
