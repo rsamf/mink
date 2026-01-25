@@ -40,15 +40,16 @@ async def verify_api_key(request: Request, call_next):
     if request.url.path in ["/docs", "/openapi.json", "/redoc"]:
         return await call_next(request)
 
-    cfg = config_store.get("config")
+    cfg = config_store["config"]
+    keys = cfg["server"]["auth"].get("keys", [])
+    assert len(keys) > 0, "At least one API key should be configured"
 
-    if cfg and "auth" in cfg:
-        api_key = request.headers.get("X-API-Key")
-        if not api_key or api_key not in cfg.auth.get("keys", []):
-            return JSONResponse(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"detail": "Invalid or missing API Key"},
-            )
+    api_key = request.headers.get("X-API-Key")
+    if not api_key or api_key not in keys:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Invalid or missing API Key"},
+        )
 
     return await call_next(request)
 
@@ -134,6 +135,10 @@ def run_worker_task(job: Job):
     logger.info(
         f"Job {job_id}: Retrieved {len(full_transcript)} transcript events and {len(full_ocr)} OCR events."
     )
+    if len(full_transcript) == 0:
+        logger.error(f"Job {job_id}: No transcription events found, marking job as failed or did nobody speak?")
+        set_job_status(job_id, "failed")
+        return
 
     try:
         # We use a new session here since this runs in a separate thread (BackgroundTasks)
@@ -172,9 +177,16 @@ def run_worker_task(job: Job):
         set_job_status(job_id, "completed")
         return
 
-    intelligent_notes = cast_to_intelligent_notes(
-        full_transcript, full_ocr, job_id, cfg.cast
-    )
+    try:
+        logger.info(f"Job {job_id}: Starting intelligent notes casting.")
+        intelligent_notes = cast_to_intelligent_notes(
+            full_transcript, full_ocr, job_id, cfg.cast
+        )
+    except Exception as e:
+        logger.error(f"Job {job_id}: Intelligent notes casting failed: {e}")
+        set_job_status(job_id, "completed")
+        return
+        
     try:
         with next(get_session()) as session:
             db_job = session.get(Job, job_id)
