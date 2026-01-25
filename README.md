@@ -167,6 +167,7 @@ https://docs.cloud.google.com/sql/docs/mysql/pre-built-tools-with-mcp-toolbox#co
 ## Limitations
 * No UI or web app
 * No integration with Zoom or other meeting platforms
+* No user management, no auth. Only has restricted access (to everything)
 
 ## Acknowledgments
 Thank you to:
