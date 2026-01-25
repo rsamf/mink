@@ -7,15 +7,6 @@
   <h1 align="center">Mink</h1>
 
   <p align="center">
-    <a href="https://github.com/rsamf/mink/blob/main/LICENSE">
-      <img alt="GitHub License" src="https://img.shields.io/github/license/graphbookai/graphbook">
-    </a>
-    <a href="https://hub.docker.com/r/rsamf/mink">
-      <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/rsamf/mink">
-    </a>
-  </p>
-
-  <p align="center">
     AI Notetaker for Meetings (Open-Source Otter AI Alternative)
   </p>
 </p>

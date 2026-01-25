@@ -9,7 +9,6 @@ import time
 import glob
 from multiprocessing import Queue
 from contextlib import asynccontextmanager
-from sqlmodel import select
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, status
 from fastapi.responses import JSONResponse
 from omegaconf import DictConfig
