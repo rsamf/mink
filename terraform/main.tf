@@ -44,7 +44,7 @@ resource "google_artifact_registry_repository" "repo" {
 }
 
 locals {
-    image_name = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository_id}/mink:latest"
+  image_name = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository_id}/mink:latest"
 }
 
 # Cloud Run Service
@@ -103,11 +103,11 @@ resource "google_cloud_run_v2_service" "default" {
         name  = "INSTANCE_CONNECTION_NAME"
         value = google_sql_database_instance.master.connection_name
       }
-      # Local proxy or direct socket? usually cloud run uses socket at /cloudsql/CONNECTION_NAME
-      # But with psycopg and python, we might need to adjust connection string. 
-      # For now, let's assume valid pg config.
+      env {
+        name  = "HF_TOKEN"
+        value = var.hf_token != null ? var.hf_token : ""
+      }
 
-      # Example resource limits - adjust as needed
       resources {
         limits = {
           cpu              = "4"

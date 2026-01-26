@@ -86,9 +86,9 @@ docker push <artifact_registry_url>
 You may need to run `terraform apply` again to have Cloud Run re-pull.
 
 > [!WARNING]
-> You may have trouble downloading HF models such as FasterWhisper with Hugging Face's restrictive rate-limiting. You could see something like this:
+> If you don't set your `hf_token` in [terraform.tfvars](terraform/terraform.tfvars), you may have trouble downloading HF models such as FasterWhisper with Hugging Face's restrictive rate-limiting. You could see something like this:
 "HTTP Request: GET https://huggingface.co/api/models/mobiuslabsgmbh/faster-whisper-large-v3-turbo/revision/main "HTTP/1.1 429 Too Many Requests".
-If you see that, just try submitting again.
+If you see that, create a Hugging Face token with read permissions.
 
 ## CLI
 

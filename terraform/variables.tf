@@ -29,3 +29,8 @@ variable "repository_id" {
   type        = string
   default     = "mink-repo"
 }
+
+variable "hf_token" {
+  description = "Hugging Face token"
+  type        = string
+}
