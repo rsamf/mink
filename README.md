@@ -33,6 +33,9 @@ First, clone the repo.
 
 ### Demo
 
+> [!CAUTION]
+> Do not attempt. The deployment of the demo is currently down.
+
 The easiest way to start is to try the demo. **This requires an API key distributed by me (@rsamf).**
 
 1. Make sure the repo is clone, and change your cwd to the repo directory.
