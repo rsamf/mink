@@ -25,7 +25,7 @@ talk to your meeting data with supporting tools such as Claude Desktop.
 ![architecture diagram of mink](/assets/diag.png)
 
 #### Why I Built This?
-This was a 3-day take-home assignment for a job at Roboflow. Therefore, expect a lot of missing features.
+This was a 3-day take-home assignment for a job. Therefore, expect a lot of missing features.
 
 ## Getting Started
 
